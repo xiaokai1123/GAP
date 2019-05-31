@@ -1,0 +1,27 @@
+#!/bin/sh
+
+lspci -n | grep "8086:1533" > /dev/null 2>&1
+if [ $? != 0 ]; then
+    echo "No found eeprom"
+    exit 0
+else
+    MAGIC=0x15338086
+    offset=0x03f0
+fi
+
+sn_sample="RSG010C600000001"
+sn_interface="eth1"
+sn_write=${sn_sample}
+sn_len=$((${#sn_write}-1))
+
+for i in $(seq 0 ${sn_len})
+do
+    # convert ascii to hex data
+    value=${sn_write:i:1}
+    sn_hex=`printf "0x%x" "'${value}"`
+    hex_value=`printf "%s" $sn_hex`
+    echo "value: ${value}, ascii: $hex_value"
+    #self increate offset every value
+    ethtool -E ${sn_interface} magic ${MAGIC} offset $offset length 1 value $hex_value > /dev/null 2>&1 
+    offset=$(($offset+1))
+done

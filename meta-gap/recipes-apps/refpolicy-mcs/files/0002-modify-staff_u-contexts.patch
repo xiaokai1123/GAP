@@ -1,0 +1,23 @@
+From 46adf6be9510f2b3b94adbae4c15f54832e2d17c Mon Sep 17 00:00:00 2001
+From: lianyq <yqlian@acorn-net.com>
+Date: Mon, 27 Nov 2017 15:47:24 +0800
+Subject: [PATCH] modify staff_u contexts
+
+---
+ config/appconfig-mcs/staff_u_default_contexts | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/config/appconfig-mcs/staff_u_default_contexts b/config/appconfig-mcs/staff_u_default_contexts
+index daefcf7..54628d1 100644
+--- a/config/appconfig-mcs/staff_u_default_contexts
++++ b/config/appconfig-mcs/staff_u_default_contexts
+@@ -1,4 +1,5 @@
+-system_r:local_login_t:s0	staff_r:staff_t:s0 sysadm_r:sysadm_t:s0
++#system_r:local_login_t:s0	staff_r:staff_t:s0 sysadm_r:sysadm_t:s0
++system_r:local_login_t:s0	staff_r:staff_t:s0
+ system_r:remote_login_t:s0	staff_r:staff_t:s0
+ system_r:sshd_t:s0		staff_r:staff_t:s0 sysadm_r:sysadm_t:s0
+ system_r:crond_t:s0		staff_r:staff_t:s0 staff_r:cronjob_t:s0
+-- 
+1.9.1
+

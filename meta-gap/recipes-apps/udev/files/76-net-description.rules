@@ -1,0 +1,14 @@
+#
+ACTION=="remove", GOTO="net_end"
+SUBSYSTEM!="net", GOTO="net_end"
+
+SUBSYSTEM=="net", ACTION=="add", ATTR{ifindex}=="2", KERNEL=="eth0", NAME="agl1"
+SUBSYSTEM=="net", ACTION=="add", ATTR{ifindex}=="3", KERNEL=="eth1", NAME="eth3"
+SUBSYSTEM=="net", ACTION=="add", ATTR{ifindex}=="4", KERNEL=="eth2", NAME="eth1"
+SUBSYSTEM=="net", ACTION=="add", ATTR{ifindex}=="5", KERNEL=="eth3", NAME="agl0"
+SUBSYSTEM=="net", ACTION=="add", ATTR{ifindex}=="6", KERNEL=="eth4", NAME="eth0"
+SUBSYSTEM=="net", ACTION=="add", ATTR{ifindex}=="7", KERNEL=="eth5", NAME="eth4"
+SUBSYSTEM=="net", ACTION=="add", ATTR{ifindex}=="8", KERNEL=="eth6", NAME="eth2"
+SUBSYSTEM=="net", ACTION=="add", ATTR{ifindex}=="9", KERNEL=="eth7", NAME="eth5"
+
+LABEL="net_end"

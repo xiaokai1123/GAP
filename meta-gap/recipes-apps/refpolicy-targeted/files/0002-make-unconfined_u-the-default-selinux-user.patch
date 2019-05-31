@@ -1,0 +1,218 @@
+From 25e1ec56ab3fe4f8cd3eb5c4b46f476ea715435a Mon Sep 17 00:00:00 2001
+From: lianyq <yqlian@acorn-net.com>
+Date: Fri, 1 Dec 2017 17:52:35 +0800
+Subject: [PATCH] make unconfined_u the default selinux user
+
+---
+ config/appconfig-mcs/root_default_contexts    |  2 +-
+ config/appconfig-mcs/seusers                  |  3 +-
+ config/appconfig-mcs/staff_u_default_contexts |  4 +--
+ policy/modules/roles/sysadm.te                |  1 +
+ policy/modules/system/init.if                 | 46 ++++++++++++++++++++++-----
+ policy/modules/system/unconfined.te           |  7 ++++
+ policy/users                                  | 16 ++++------
+ 7 files changed, 57 insertions(+), 22 deletions(-)
+
+diff --git a/config/appconfig-mcs/root_default_contexts b/config/appconfig-mcs/root_default_contexts
+index 7805778..7c35b17 100644
+--- a/config/appconfig-mcs/root_default_contexts
++++ b/config/appconfig-mcs/root_default_contexts
+@@ -8,4 +8,4 @@ user_r:user_su_t:s0		unconfined_r:unconfined_t:s0 sysadm_r:sysadm_t:s0 staff_r:s
+ #
+ # Uncomment if you want to automatically login as sysadm_r
+ #
+-#system_r:sshd_t:s0		unconfined_r:unconfined_t:s0 sysadm_r:sysadm_t:s0 staff_r:staff_t:s0 user_r:user_t:s0
++system_r:sshd_t:s0		unconfined_r:unconfined_t:s0 sysadm_r:sysadm_t:s0 staff_r:staff_t:s0 user_r:user_t:s0
+diff --git a/config/appconfig-mcs/seusers b/config/appconfig-mcs/seusers
+index ce614b4..86c00cb 100644
+--- a/config/appconfig-mcs/seusers
++++ b/config/appconfig-mcs/seusers
+@@ -1,2 +1,3 @@
+-root:root:s0-mcs_systemhigh
++admin:root:s0-s0:c0.c1023
++root:staff_u:s0-mcs_systemhigh
+ __default__:user_u:s0
+diff --git a/config/appconfig-mcs/staff_u_default_contexts b/config/appconfig-mcs/staff_u_default_contexts
+index daefcf7..863d622 100644
+--- a/config/appconfig-mcs/staff_u_default_contexts
++++ b/config/appconfig-mcs/staff_u_default_contexts
+@@ -1,6 +1,6 @@
+-system_r:local_login_t:s0	staff_r:staff_t:s0 sysadm_r:sysadm_t:s0
++system_r:local_login_t:s0	staff_r:staff_t:s0
+ system_r:remote_login_t:s0	staff_r:staff_t:s0
+-system_r:sshd_t:s0		staff_r:staff_t:s0 sysadm_r:sysadm_t:s0
++system_r:sshd_t:s0		staff_r:staff_t:s0
+ system_r:crond_t:s0		staff_r:staff_t:s0 staff_r:cronjob_t:s0
+ system_r:xdm_t:s0		staff_r:staff_t:s0
+ staff_r:staff_su_t:s0		staff_r:staff_t:s0
+diff --git a/policy/modules/roles/sysadm.te b/policy/modules/roles/sysadm.te
+index 46fbe81..2f2565f 100644
+--- a/policy/modules/roles/sysadm.te
++++ b/policy/modules/roles/sysadm.te
+@@ -34,6 +34,7 @@ ubac_file_exempt(sysadm_t)
+ ubac_fd_exempt(sysadm_t)
+ 
+ init_exec(sysadm_t)
++init_script_role_transition(sysadm_r)
+ init_get_system_status(sysadm_t)
+ init_disable(sysadm_t)
+ init_enable(sysadm_t)
+diff --git a/policy/modules/system/init.if b/policy/modules/system/init.if
+index 0cb296f..1fc3ea7 100644
+--- a/policy/modules/system/init.if
++++ b/policy/modules/system/init.if
+@@ -1234,11 +1234,12 @@ interface(`init_script_file_entry_type',`
+ #
+ interface(`init_spec_domtrans_script',`
+ 	gen_require(`
+-		type initrc_t, initrc_exec_t;
++		type initrc_t;
++		attribute init_script_file_type;
+ 	')
+ 
+ 	files_list_etc($1)
+-	spec_domtrans_pattern($1, initrc_exec_t, initrc_t)
++	spec_domtrans_pattern($1, init_script_file_type, initrc_t)
+ 
+ 	ifdef(`distro_gentoo',`
+ 		gen_require(`
+@@ -1249,11 +1250,11 @@ interface(`init_spec_domtrans_script',`
+ 	')
+ 
+ 	ifdef(`enable_mcs',`
+-		range_transition $1 initrc_exec_t:process s0;
++		range_transition $1 init_script_file_type:process s0;
+ 	')
+ 
+ 	ifdef(`enable_mls',`
+-		range_transition $1 initrc_exec_t:process s0 - mls_systemhigh;
++		range_transition $1 init_script_file_type:process s0 - mls_systemhigh;
+ 	')
+ ')
+ 
+@@ -1269,18 +1270,19 @@ interface(`init_spec_domtrans_script',`
+ #
+ interface(`init_domtrans_script',`
+ 	gen_require(`
+-		type initrc_t, initrc_exec_t;
++		type initrc_t;
++		attribute init_script_file_type;
+ 	')
+ 
+ 	files_list_etc($1)
+-	domtrans_pattern($1, initrc_exec_t, initrc_t)
++	domtrans_pattern($1, init_script_file_type, initrc_t)
+ 
+ 	ifdef(`enable_mcs',`
+-		range_transition $1 initrc_exec_t:process s0;
++		range_transition $1 init_script_file_type:process s0;
+ 	')
+ 
+ 	ifdef(`enable_mls',`
+-		range_transition $1 initrc_exec_t:process s0 - mls_systemhigh;
++		range_transition $1 init_script_file_type:process s0 - mls_systemhigh;
+ 	')
+ ')
+ 
+@@ -2504,3 +2506,31 @@ interface(`init_reload_all_units',`
+ 
+ 	allow $1 systemdunit:service reload;
+ ')
++
++########################################
++## <summary>
++##     Transition to system_r when execute an init script
++## </summary>
++## <desc>
++##     <p>
++##     Execute a init script in a specified role
++##     </p>
++##     <p>
++##     No interprocess communication (signals, pipes,
++##     etc.) is provided by this interface since
++##     the domains are not owned by this module.
++##     </p>
++## </desc>
++## <param name="source_role">
++##     <summary>
++##     Role to transition from.
++##     </summary>
++## </param>
++#
++interface(`init_script_role_transition',`
++       gen_require(`
++               attribute init_script_file_type;
++       ')
++
++       role_transition $1 init_script_file_type system_r;
++')
+diff --git a/policy/modules/system/unconfined.te b/policy/modules/system/unconfined.te
+index 189869d..5688bbb 100644
+--- a/policy/modules/system/unconfined.te
++++ b/policy/modules/system/unconfined.te
+@@ -20,6 +20,11 @@ type unconfined_execmem_t;
+ type unconfined_execmem_exec_t;
+ init_system_domain(unconfined_execmem_t, unconfined_execmem_exec_t)
+ role unconfined_r types unconfined_execmem_t;
++role unconfined_r types unconfined_t;
++role system_r types unconfined_t;
++role_transition system_r unconfined_exec_t unconfined_r;
++allow system_r unconfined_r;
++allow unconfined_r system_r;
+ 
+ ########################################
+ #
+@@ -50,6 +55,8 @@ userdom_user_home_dir_filetrans_user_home_content(unconfined_t, { dir file lnk_f
+ ifdef(`direct_sysadm_daemon',`
+         optional_policy(`
+                 init_run_daemon(unconfined_t, unconfined_r)
++                init_domtrans_script(unconfined_t)
++                init_script_role_transition(unconfined_r)
+         ')
+ ',`
+         ifdef(`distro_gentoo',`
+diff --git a/policy/users b/policy/users
+index ca20375..ac1ca6c 100644
+--- a/policy/users
++++ b/policy/users
+@@ -15,7 +15,7 @@
+ # and a user process should never be assigned the system user
+ # identity.
+ #
+-gen_user(system_u,, system_r, s0, s0 - mls_systemhigh, mcs_allcats)
++gen_user(system_u,, system_r unconfined_r, s0, s0 - mls_systemhigh, mcs_allcats)
+ 
+ #
+ # user_u is a generic user identity for Linux users who have no
+@@ -25,14 +25,14 @@ gen_user(system_u,, system_r, s0, s0 - mls_systemhigh, mcs_allcats)
+ # permit any access to such users, then remove this entry.
+ #
+ gen_user(user_u, user, user_r, s0, s0)
+-gen_user(staff_u, staff, staff_r sysadm_r ifdef(`enable_mls',`secadm_r auditadm_r'), s0, s0 - mls_systemhigh, mcs_allcats)
+-gen_user(sysadm_u, sysadm, sysadm_r, s0, s0 - mls_systemhigh, mcs_allcats)
++gen_user(staff_u, user, staff_r sysadm_r ifdef(`enable_mls',`secadm_r auditadm_r') unconfined_r, s0, s0 - mls_systemhigh, mcs_allcats)
++gen_user(sysadm_u, user, sysadm_r, s0, s0 - mls_systemhigh, mcs_allcats)
+ 
+ # Until order dependence is fixed for users:
+ ifdef(`direct_sysadm_daemon',`
+-        gen_user(unconfined_u, unconfined, unconfined_r system_r, s0, s0 - mls_systemhigh, mcs_allcats)
++        gen_user(unconfined_u, user, unconfined_r system_r, s0, s0 - mls_systemhigh, mcs_allcats)
+ ',`
+-        gen_user(unconfined_u, unconfined, unconfined_r, s0, s0 - mls_systemhigh, mcs_allcats)
++        gen_user(unconfined_u, user, unconfined_r, s0, s0 - mls_systemhigh, mcs_allcats)
+ ')
+ 
+ #
+@@ -42,8 +42,4 @@ ifdef(`direct_sysadm_daemon',`
+ # role should use the staff_r role instead of the user_r role when
+ # not in the sysadm_r.
+ #
+-ifdef(`direct_sysadm_daemon',`
+-	gen_user(root, sysadm, sysadm_r staff_r ifdef(`enable_mls',`secadm_r auditadm_r') system_r, s0, s0 - mls_systemhigh, mcs_allcats)
+-',`
+-	gen_user(root, sysadm, sysadm_r staff_r ifdef(`enable_mls',`secadm_r auditadm_r'), s0, s0 - mls_systemhigh, mcs_allcats)
+-')
++gen_user(root, user, sysadm_r staff_r ifdef(`enable_mls',`secadm_r auditadm_r') unconfined_r system_r, s0, s0 - mls_systemhigh, mcs_allcats)
+-- 
+1.9.1
+

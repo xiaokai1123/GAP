@@ -1,0 +1,60 @@
+From 6e1a457a23e7801c3f1e6c804c9944ec563c2860 Mon Sep 17 00:00:00 2001
+From: lianyq <yqlian@acorn-net.com>
+Date: Mon, 27 Nov 2017 11:13:27 +0800
+Subject: [PATCH] fix optional issue on sysadm module
+
+---
+ policy/modules/system/init.te       | 16 +++++++++-------
+ policy/modules/system/locallogin.te |  4 +++-
+ 2 files changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/policy/modules/system/init.te b/policy/modules/system/init.te
+index 6503fff..31ea3cc 100644
+--- a/policy/modules/system/init.te
++++ b/policy/modules/system/init.te
+@@ -302,12 +302,14 @@ ifdef(`init_systemd',`
+ 		modutils_domtrans_insmod(init_t)
+ 	')
+ ',`
+-	tunable_policy(`init_upstart',`
+-		corecmd_shell_domtrans(init_t, initrc_t)
+-	',`
+-		# Run the shell in the sysadm role for single-user mode.
+-		# causes problems with upstart
+-		sysadm_shell_domtrans(init_t)
++	optional_policy(`
++		tunable_policy(`init_upstart',`
++			corecmd_shell_domtrans(init_t, initrc_t)
++		',`
++			# Run the shell in the sysadm role for single-user mode.
++			# causes problems with upstart
++			sysadm_shell_domtrans(init_t)
++		')
+ 	')
+ ')
+ 
+@@ -1111,4 +1113,4 @@ optional_policy(`
+ # systemd related allow rules
+ allow kernel_t init_t:process dyntransition;
+ allow devpts_t device_t:filesystem associate;
+-allow init_t self:capability2 block_suspend;
+\ No newline at end of file
++allow init_t self:capability2 block_suspend;
+diff --git a/policy/modules/system/locallogin.te b/policy/modules/system/locallogin.te
+index 8386084..5242713 100644
+--- a/policy/modules/system/locallogin.te
++++ b/policy/modules/system/locallogin.te
+@@ -246,7 +246,9 @@ userdom_use_unpriv_users_fds(sulogin_t)
+ userdom_search_user_home_dirs(sulogin_t)
+ userdom_use_user_ptys(sulogin_t)
+ 
+-sysadm_shell_domtrans(sulogin_t)
++optional_policy(`
++	sysadm_shell_domtrans(sulogin_t)
++')
+ 
+ # suse and debian do not use pam with sulogin...
+ ifdef(`distro_suse', `define(`sulogin_no_pam')')
+-- 
+1.9.1
+

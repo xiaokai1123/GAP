@@ -1,0 +1,6 @@
+#
+KERNEL=="ethportdet", SUBSYSTEM=="misc", ACTION=="offline", RUN+="/lib64/udev/portalarm.sh offline"
+KERNEL=="ethportdet", SUBSYSTEM=="misc", ACTION=="online", RUN+="/lib64/udev/portalarm.sh online"
+
+KERNEL=="igbportdet", SUBSYSTEM=="misc", ACTION=="offline", RUN+="/lib64/udev/portalarm.sh offline"
+KERNEL=="igbportdet", SUBSYSTEM=="misc", ACTION=="online", RUN+="/lib64/udev/portalarm.sh online"

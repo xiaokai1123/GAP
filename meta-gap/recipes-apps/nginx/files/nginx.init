@@ -1,0 +1,70 @@
+#! /bin/sh
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/sbin/nginx
+NAME=nginx
+DESC=nginx
+PID=/var/run/nginx/nginx.pid
+
+if [ -e /var/run/boardtype ]; then
+    boardtype=`cat /var/run/boardtype`
+    if [ x"$boardtype" != x"inner" ]; then
+        echo 'run this application at INNER '
+        exit 0
+    fi
+fi
+
+test -x $DAEMON || exit 0
+
+# Include nginx defaults if available
+if [ -f /etc/default/nginx ] ; then
+        . /etc/default/nginx
+fi
+
+if [ ! -e /data/key_cert/client.crt ]; then
+	mkdir -p /data/key_cert/
+        cp /etc/nginx/key_cert/* /data/key_cert/ -r
+fi
+
+if [ ! -f /var/log/nginx/error.log ]; then
+	mkdir /var/log/nginx -p
+	touch /var/log/nginx/error.log
+fi
+
+set -e
+
+case "$1" in
+  start)
+        echo -n "Starting $DESC: "
+        start-stop-daemon --start --quiet --pidfile $PID \
+                --name $NAME --exec $DAEMON -- $DAEMON_OPTS
+        echo "$NAME."
+        ;;
+  stop)
+        echo -n "Stopping $DESC: "
+        start-stop-daemon -K --quiet --pidfile $PID \
+                --name $NAME
+        echo "$NAME."
+        ;;
+  restart|force-reload)
+        echo -n "Restarting $DESC: "
+        start-stop-daemon -K --quiet --pidfile $PID \
+                --name $NAME
+        sleep 1
+        start-stop-daemon --start --quiet --pidfile $PID \
+                --name $NAME --exec $DAEMON -- $DAEMON_OPTS
+        echo "$NAME."
+        ;;
+  reload)
+      echo -n "Reloading $DESC configuration: "
+      start-stop-daemon --stop --signal HUP --quiet --pidfile $PID \
+          --exec $DAEMON
+      echo "$NAME."
+      ;;
+  *)
+        N=/etc/init.d/$NAME
+        echo "Usage: $N {start|stop|restart|force-reload}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

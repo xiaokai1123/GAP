@@ -1,0 +1,9 @@
+# Configuration script used by ntpdate-sync script
+
+NTPSERVERS="192.168.0.2"
+
+# Set to "yes" to write time to hardware clock on success
+UPDATE_HWCLOCK="yes"
+
+OPTS="-u"
+

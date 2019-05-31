@@ -1,0 +1,423 @@
+From 18152b43f5c490ecbfe0183fd446104d72805e82 Mon Sep 17 00:00:00 2001
+From: "xiaodong.li" <xiaodong.li@acron-net.com>
+Date: Wed, 13 Sep 2017 15:51:44 +0800
+Subject: [PATCH] add libxt_land libxt_psd libxt_syncookie to iptables
+
+---
+ extensions/compat_user.h     |  12 ++++
+ extensions/libxt_land.c      |  89 +++++++++++++++++++++++++
+ extensions/libxt_psd.c       | 155 +++++++++++++++++++++++++++++++++++++++++++
+ extensions/libxt_syncookie.c |  68 +++++++++++++++++++
+ extensions/xt_land.h         |  10 +++
+ extensions/xt_psd.h          |  30 +++++++++
+ 6 files changed, 364 insertions(+)
+ create mode 100755 extensions/compat_user.h
+ create mode 100755 extensions/libxt_land.c
+ create mode 100755 extensions/libxt_psd.c
+ create mode 100755 extensions/libxt_syncookie.c
+ create mode 100755 extensions/xt_land.h
+ create mode 100755 extensions/xt_psd.h
+
+diff --git a/extensions/compat_user.h b/extensions/compat_user.h
+new file mode 100755
+index 0000000..3ad168c
+--- /dev/null
++++ b/extensions/compat_user.h
+@@ -0,0 +1,12 @@
++/*
++ *	Userspace-level compat hacks
++ */
++#ifndef _XTABLES_COMPAT_USER_H
++#define _XTABLES_COMPAT_USER_H 1
++
++/* linux-glibc-devel 2.6.34 header screwup */
++#ifndef ALIGN
++#	define ALIGN(s, n) (((s) + ((n) - 1)) & ~((n) - 1))
++#endif
++
++#endif /* _XTABLES_COMPAT_USER_H */
+diff --git a/extensions/libxt_land.c b/extensions/libxt_land.c
+new file mode 100755
+index 0000000..f85df71
+--- /dev/null
++++ b/extensions/libxt_land.c
+@@ -0,0 +1,89 @@
++#include <stdbool.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <netdb.h>
++#include <string.h>
++#include <stdlib.h>
++#include <syslog.h>
++#include <getopt.h>
++#include <xtables.h>
++#include "xt_land.h"
++#include "compat_user.h"
++
++/* Function which prints out usage message. */
++static void land_mt_help(void) {
++	printf(
++		"land match options:\n"
++		"                                          No options\n\n");
++}
++
++/* Initialize the target. */
++static void land_mt_init(struct xt_entry_match *match)
++{
++	return;
++}
++
++static int land_mt_parse(int c, char **argv, int invert, unsigned int *flags,
++                     const void *entry, struct xt_entry_match **match)
++{
++	return true;
++}
++
++/* Final check; nothing. */
++static void land_mt_final_check(unsigned int flags) 
++{
++	return;
++}
++
++static void land_mt_save(const void *ip, const struct xt_entry_match *match)
++{
++	return;
++}
++
++static void land_mt_print(const void *ip, const struct xt_entry_match *match, int numeric)
++{
++	printf(" land match ");
++}
++
++static struct xtables_match land_mt_reg[] = {
++	{
++		.name           = "land",
++		.version        = XTABLES_VERSION,
++		.revision       = 0,
++		.family         = NFPROTO_IPV4,
++		.size		    = XT_ALIGN(sizeof(struct xt_land_mtinfo)),
++		.userspacesize	= XT_ALIGN(sizeof(struct xt_land_mtinfo)),
++		.help           = land_mt_help,
++		.init           = land_mt_init,
++		.parse          = land_mt_parse,
++		.final_check    = land_mt_final_check,
++		.print          = land_mt_print,
++		.save           = land_mt_save,
++	},
++	{
++		.version        = XTABLES_VERSION,
++		.name           = "land",
++		.revision       = 0,
++		.family         = NFPROTO_IPV6,
++		.size		    = XT_ALIGN(sizeof(struct xt_land_mtinfo)),
++		.userspacesize  = XT_ALIGN(sizeof(struct xt_land_mtinfo)),
++		.help			= land_mt_help,
++		.init			= land_mt_init,
++		.parse			= land_mt_parse,
++		.final_check	= land_mt_final_check,
++		.print			= land_mt_print,
++		.save			= land_mt_save,
++	}
++};
++
++#ifndef ARRAY_SIZE
++#define ARRAY_SIZE(x) (sizeof(x) / sizeof(*(x)))
++#endif
++
++static __attribute__((constructor)) void land_mt_ldr(void)
++{
++	xtables_register_matches(land_mt_reg, ARRAY_SIZE(land_mt_reg));
++}
++
++
++
+diff --git a/extensions/libxt_psd.c b/extensions/libxt_psd.c
+new file mode 100755
+index 0000000..05940e7
+--- /dev/null
++++ b/extensions/libxt_psd.c
+@@ -0,0 +1,155 @@
++/*
++  Shared library add-on to iptables to add PSD support
++
++  Copyright (C) 2000,2001 astaro AG
++
++  This file is distributed under the terms of the GNU General Public
++  License (GPL). Copies of the GPL can be obtained from:
++     ftp://prep.ai.mit.edu/pub/gnu/GPL
++
++  2000-05-04 Markus Hennig <hennig@astaro.de> : initial
++  2000-08-18 Dennis Koslowski <koslowski@astaro.de> : first release
++  2000-12-01 Dennis Koslowski <koslowski@astaro.de> : UDP scans detection added
++  2001-02-04 Jan Rekorajski <baggins@pld.org.pl> : converted from target to match
++  2003-03-02 Harald Welte <laforge@netfilter.org>: fix 'storage' bug
++  2008-04-03 Mohd Nawawi <nawawi@tracenetworkcorporation.com>: update to 2.6.24 / 1.4 code
++  2008-06-24 Mohd Nawawi <nawawi@tracenetworkcorporation.com>: update to 2.6.24 / 1.4.1 code
++  2009-08-07 Mohd Nawawi Mohamad Jamili <nawawi@tracenetworkcorporation.com> : ported to xtables-addons
++*/
++
++#include <stdbool.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <netdb.h>
++#include <string.h>
++#include <stdlib.h>
++#include <syslog.h>
++#include <getopt.h>
++#include <xtables.h>
++#include <linux/netfilter/x_tables.h>
++#include "xt_psd.h"
++#include "compat_user.h"
++
++#define SCAN_DELAY_THRESHOLD		300
++
++/* Function which prints out usage message. */
++static void psd_mt_help(void) {
++	printf(
++		"psd match options:\n"
++		" --psd-weight-threshold threshhold  Portscan detection weight threshold\n"
++		" --psd-delay-threshold  delay       Portscan detection delay threshold\n"
++		" --psd-lo-ports-weight  lo          Privileged ports weight\n"
++		" --psd-hi-ports-weight  hi          High ports weight\n\n");
++}
++
++static const struct option psd_mt_opts[] = {
++	{.name = "psd-weight-threshold", .has_arg = true, .val = '1'},
++	{.name = "psd-delay-threshold", .has_arg = true, .val = '2'},
++	{.name = "psd-lo-ports-weight", .has_arg = true, .val = '3'},
++	{.name = "psd-hi-ports-weight", .has_arg = true, .val = '4'},
++	{NULL}
++};
++
++/* Initialize the target. */
++static void psd_mt_init(struct xt_entry_match *match) {
++	struct xt_psd_info *psdinfo = (struct xt_psd_info *)match->data;
++	psdinfo->weight_threshold = SCAN_WEIGHT_THRESHOLD;
++	psdinfo->delay_threshold = SCAN_DELAY_THRESHOLD;
++	psdinfo->lo_ports_weight = PORT_WEIGHT_PRIV;
++	psdinfo->hi_ports_weight = PORT_WEIGHT_HIGH;
++}
++
++#define XT_PSD_OPT_CTRESH 0x01
++#define XT_PSD_OPT_DTRESH 0x02
++#define XT_PSD_OPT_LPWEIGHT 0x04
++#define XT_PSD_OPT_HPWEIGHT 0x08
++
++static int psd_mt_parse(int c, char **argv, int invert, unsigned int *flags,
++                     const void *entry, struct xt_entry_match **match)
++{
++	struct xt_psd_info *psdinfo = (struct xt_psd_info *)(*match)->data;
++	unsigned int num;
++
++	switch (c) {
++		/* PSD-weight-threshold */
++		case '1':
++			if (*flags & XT_PSD_OPT_CTRESH)
++				xtables_error(PARAMETER_PROBLEM,"Can't specify --psd-weight-threshold twice");
++			if (!xtables_strtoui(optarg, NULL, &num, 0, PSD_MAX_RATE))
++				xtables_error(PARAMETER_PROBLEM, "bad --psd-weight-threshold '%s'", optarg);
++			psdinfo->weight_threshold = num;
++			*flags |= XT_PSD_OPT_CTRESH;
++			return true;
++
++		/* PSD-delay-threshold */
++		case '2':
++			if (*flags & XT_PSD_OPT_DTRESH)
++				xtables_error(PARAMETER_PROBLEM, "Can't specify --psd-delay-threshold twice");
++			if (!xtables_strtoui(optarg, NULL, &num, 0, PSD_MAX_RATE))
++				xtables_error(PARAMETER_PROBLEM, "bad --psd-delay-threshold '%s'", optarg);
++			psdinfo->delay_threshold = num;
++			*flags |= XT_PSD_OPT_DTRESH;
++			return true;
++
++		/* PSD-lo-ports-weight */
++		case '3':
++			if (*flags & XT_PSD_OPT_LPWEIGHT)
++				xtables_error(PARAMETER_PROBLEM, "Can't specify --psd-lo-ports-weight twice");
++			if (!xtables_strtoui(optarg, NULL, &num, 0, PSD_MAX_RATE))
++				xtables_error(PARAMETER_PROBLEM, "bad --psd-lo-ports-weight '%s'", optarg);
++			psdinfo->lo_ports_weight = num;
++			*flags |= XT_PSD_OPT_LPWEIGHT;
++			return true;
++
++		/* PSD-hi-ports-weight */
++		case '4':
++			if (*flags & XT_PSD_OPT_HPWEIGHT)
++				xtables_error(PARAMETER_PROBLEM, "Can't specify --psd-hi-ports-weight twice");
++			if (!xtables_strtoui(optarg, NULL, &num, 0, PSD_MAX_RATE))
++				xtables_error(PARAMETER_PROBLEM, "bad --psd-hi-ports-weight '%s'", optarg);
++			psdinfo->hi_ports_weight = num;
++			*flags |= XT_PSD_OPT_HPWEIGHT;
++			return true;
++	}
++	return false;
++}
++
++/* Final check; nothing. */
++static void psd_mt_final_check(unsigned int flags) {}
++
++static void psd_mt_save(const void *ip, const struct xt_entry_match *match)
++{
++	const struct xt_psd_info *psdinfo = (const struct xt_psd_info *)match->data;
++	printf(" --psd-weight-threshold %u ", psdinfo->weight_threshold);
++	printf("--psd-delay-threshold %u ", psdinfo->delay_threshold);
++	printf("--psd-lo-ports-weight %u ", psdinfo->lo_ports_weight);
++	printf("--psd-hi-ports-weight %u ", psdinfo->hi_ports_weight);
++}
++
++static void psd_mt_print(const void *ip, const struct xt_entry_match *match, int numeric)
++{
++	printf(" -m psd");
++	psd_mt_save(ip, match);
++}
++
++static struct xtables_match psd_mt_reg = {
++	.name           = "psd",
++	.version        = XTABLES_VERSION,
++	.revision       = 1,
++	.family         = NFPROTO_UNSPEC,
++	.size           = XT_ALIGN(sizeof(struct xt_psd_info)),
++	.userspacesize	= XT_ALIGN(sizeof(struct xt_psd_info)),
++	.help           = psd_mt_help,
++	.init           = psd_mt_init,
++	.parse          = psd_mt_parse,
++	.final_check    = psd_mt_final_check,
++	.print          = psd_mt_print,
++	.save           = psd_mt_save,
++	.extra_opts     = psd_mt_opts,
++};
++
++static __attribute__((constructor)) void psd_mt_ldr(void)
++{
++	xtables_register_match(&psd_mt_reg);
++}
++
+diff --git a/extensions/libxt_syncookie.c b/extensions/libxt_syncookie.c
+new file mode 100755
+index 0000000..bc4ac68
+--- /dev/null
++++ b/extensions/libxt_syncookie.c
+@@ -0,0 +1,68 @@
++#include <stdbool.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <netdb.h>
++#include <string.h>
++#include <stdlib.h>
++#include <syslog.h>
++#include <getopt.h>
++#include <xtables.h>
++#include <linux/netfilter/x_tables.h>
++#include "compat_user.h"
++
++/* Function which prints out usage message. */
++static void syncookie_mt_help(void) {
++	printf(
++		"syncookie match options:\n"
++		"                                          No options\n\n");
++}
++
++/* Initialize the target. */
++static void syncookie_mt_init(struct xt_entry_match *match)
++{
++	return;
++}
++
++static int syncookie_mt_parse(int c, char **argv, int invert, unsigned int *flags,
++                     const void *entry, struct xt_entry_match **match)
++{
++	return true;
++}
++
++/* Final check; nothing. */
++static void syncookie_mt_final_check(unsigned int flags) 
++{
++	return;
++}
++
++static void syncookie_mt_save(const void *ip, const struct xt_entry_match *match)
++{
++	return;
++}
++
++static void syncookie_mt_print(const void *ip, const struct xt_entry_match *match, int numeric)
++{
++	printf(" syncookie match ");
++}
++
++static struct xtables_match syncookie_mt_reg = {
++	.name           = "syncookie",
++	.version        = XTABLES_VERSION,
++	.revision       = 0,
++	.family         = NFPROTO_IPV4,
++	.size           = XT_ALIGN(sizeof(int)),
++	.userspacesize	= XT_ALIGN(sizeof(int)),
++	.help           = syncookie_mt_help,
++	.init           = syncookie_mt_init,
++	.parse          = syncookie_mt_parse,
++	.final_check    = syncookie_mt_final_check,
++	.print          = syncookie_mt_print,
++	.save           = syncookie_mt_save,
++};
++
++static __attribute__((constructor)) void syncookie_mt_ldr(void)
++{
++	xtables_register_match(&syncookie_mt_reg);
++}
++
++
+diff --git a/extensions/xt_land.h b/extensions/xt_land.h
+new file mode 100755
+index 0000000..d49f569
+--- /dev/null
++++ b/extensions/xt_land.h
+@@ -0,0 +1,10 @@
++#ifndef _XT_IPVS_H
++#define _XT_IPVS_H
++
++#include <linux/types.h>
++
++struct xt_land_mtinfo {
++	__u8 invert;
++};
++
++#endif
+diff --git a/extensions/xt_psd.h b/extensions/xt_psd.h
+new file mode 100755
+index 0000000..89b48fe
+--- /dev/null
++++ b/extensions/xt_psd.h
+@@ -0,0 +1,30 @@
++#ifndef _LINUX_NETFILTER_XT_PSD_H
++#define _LINUX_NETFILTER_XT_PSD_H 1
++
++#include <linux/param.h>
++#include <linux/types.h>
++
++/*
++ * High port numbers have a lower weight to reduce the frequency of false
++ * positives, such as from passive mode FTP transfers.
++ */
++#define PORT_WEIGHT_PRIV		3
++#define PORT_WEIGHT_HIGH		1
++#define	PSD_MAX_RATE			10000
++
++/*
++ * Port scan detection thresholds: at least COUNT ports need to be scanned
++ * from the same source, with no longer than DELAY ticks between ports.
++ */
++#define SCAN_MIN_COUNT			7
++#define SCAN_MAX_COUNT			(SCAN_MIN_COUNT * PORT_WEIGHT_PRIV)
++#define SCAN_WEIGHT_THRESHOLD		SCAN_MAX_COUNT
++
++struct xt_psd_info {
++	__u32 weight_threshold;
++	__u32 delay_threshold;
++	__u16 lo_ports_weight;
++	__u16 hi_ports_weight;
++};
++
++#endif /*_LINUX_NETFILTER_XT_PSD_H*/
+-- 
+1.9.1
+

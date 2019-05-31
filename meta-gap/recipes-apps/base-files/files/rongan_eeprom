@@ -1,0 +1,36 @@
+#!/bin/sh
+
+dev="eth1"
+offset=0x03f0
+sn_hex=`ethtool -e $dev offset $offset |grep $offset | awk '{for(i=2;i<=NF;++i)printf $i" "}'`
+for sn in ${sn_hex}
+do
+    sn_c=${sn_c}`echo -e "\x${sn}"`
+done
+echo "serialnum           : ${sn_c}"
+
+#list=`ls /sys/class/net/`
+#lspci -n | grep "8086:1533"
+#if [ $? != 0 ]; then
+#    #offset=0x0ff0
+#    offset=0x03f0
+#else
+#    offset=0x03f0
+#fi
+
+#for dev in ${list}
+#do
+#    if [ $dev != "bond0" -o $dev == "bonding_masters" -o $dev == "lo" -o $dev == "virbr0" ]; then
+#        continue
+#    fi
+#    sn_hex=`ethtool -e $dev offset $offset |grep $offset | awk '{for(i=2;i<=NF;++i)printf $i" "}'`
+#    skip=${sn_hex:0:8}
+#    if [ "$skip" != "ff ff ff" -a "$skip" != "00 00 00" ]; then
+#        for sn in ${sn_hex}
+#        do
+#            sn_c=${sn_c}`echo -e "\x${sn}"`
+#        done
+#        echo "serialnum           : ${sn_c}"
+#        break
+#    fi
+#done

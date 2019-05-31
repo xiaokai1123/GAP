@@ -1,0 +1,22 @@
+From 2841ea100186836cf1e6945808e365200faa93c1 Mon Sep 17 00:00:00 2001
+From: lianyq <yqlian@acorn-net.com>
+Date: Mon, 27 Nov 2017 14:51:44 +0800
+Subject: [PATCH] update seusers
+
+---
+ config/appconfig-mcs/seusers | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/config/appconfig-mcs/seusers b/config/appconfig-mcs/seusers
+index ce614b4..34c50d6 100644
+--- a/config/appconfig-mcs/seusers
++++ b/config/appconfig-mcs/seusers
+@@ -1,2 +1,5 @@
++admin:root:s0-mcs_systemhigh
++user:staff_u:s0
++#user1:user_u:s0
+ root:root:s0-mcs_systemhigh
+ __default__:user_u:s0
+-- 
+1.9.1
+

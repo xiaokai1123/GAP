@@ -1,0 +1,123 @@
+
+module bootked 1.0;
+
+require {
+    type staff_t;
+	type devlog_t;
+	type console_device_t;
+	type unlabeled_t;
+	type node_t;
+	type init_t;
+	type system_cronjob_t;
+	type mysqld_t;
+	type syslogd_t;
+	type default_t;
+	type rsync_t;
+	type initrc_t;
+	type etc_runtime_t;
+	type sysadm_t;
+	type cron_log_t;
+	type mysqld_etc_t;
+	type root_t;
+	type ifconfig_t;
+	type var_run_t;
+	type kmod_t;
+	type var_log_t;
+	type watchdog_device_t;
+	type iptables_t;
+	type shutdown_t;
+	type mysqld_safe_t;
+	type device_t;
+	type crond_t;
+	type initrc_var_run_t;
+	type bin_t;
+	type sshd_t;
+	class fifo_file read;
+	class unix_stream_socket { connectto read write };
+	class chr_file { open read write };
+	class tcp_socket { node_bind read write };
+	class file { append getattr lock open read write unlink execute };
+	class lnk_file read;
+	class unix_dgram_socket { create sendto };
+	class netlink_socket { read write };
+	class dir { getattr open read search write add_name remove_name };
+	class rawip_socket { setopt write create read };
+	class sock_file { create unlink write };
+	class capability net_raw;
+}
+
+#============= crond_t ==============
+allow crond_t unlabeled_t:file { getattr open read };
+
+#============= ifconfig_t ==============
+allow ifconfig_t device_t:chr_file { read write };
+allow ifconfig_t initrc_t:netlink_socket { read write };
+allow ifconfig_t initrc_t:tcp_socket { read write };
+allow ifconfig_t initrc_t:unix_stream_socket { read write };
+allow ifconfig_t initrc_var_run_t:file { read write };
+allow ifconfig_t var_run_t:fifo_file read;
+allow ifconfig_t watchdog_device_t:chr_file write;
+
+#============= iptables_t ==============
+allow iptables_t initrc_t:tcp_socket { read write };
+allow iptables_t initrc_var_run_t:file { read write };
+allow iptables_t var_run_t:fifo_file read;
+allow iptables_t watchdog_device_t:chr_file write;
+
+#============= kmod_t ==============
+allow kmod_t iptables_t:unix_stream_socket { read write };
+
+#============= mysqld_safe_t ==============
+allow mysqld_safe_t root_t:dir write;
+allow mysqld_safe_t var_log_t:lnk_file read;
+
+#============= mysqld_t ==============
+allow mysqld_t default_t:dir { getattr search };
+allow mysqld_t default_t:file { getattr open read write };
+allow mysqld_t unlabeled_t:dir { getattr search write add_name remove_name };
+allow mysqld_t unlabeled_t:file { read write open lock unlink };
+allow mysqld_t var_log_t:file { append open getattr };
+allow mysqld_t var_log_t:lnk_file read;
+allow mysqld_t var_run_t:file { getattr open read };
+allow mysqld_t root_t:dir write;
+allow mysqld_t unlabeled_t:sock_file { create unlink };
+
+#============= rsync_t ==============
+
+#!!!! This avc can be allowed using the boolean 'rsync_export_all_ro'
+allow rsync_t etc_runtime_t:file { getattr open read };
+allow rsync_t var_run_t:fifo_file read;
+allow rsync_t watchdog_device_t:chr_file write;
+
+#============= shutdown_t ==============
+allow shutdown_t bin_t:lnk_file read;
+
+#!!!! This avc can be allowed using the boolean 'init_upstart'
+allow shutdown_t self:unix_dgram_socket create;
+
+#============= sysadm_t ==============
+allow sysadm_t init_t:unix_stream_socket { read write };
+allow sysadm_t initrc_t:unix_stream_socket connectto;
+allow sysadm_t self:rawip_socket { setopt write read create };
+
+#============= staff_t ==============
+allow staff_t console_device_t:chr_file { open write };
+allow staff_t devlog_t:sock_file write;
+allow staff_t syslogd_t:unix_dgram_socket sendto;
+allow staff_t self:rawip_socket { setopt write read create };
+allow staff_t self:capability net_raw;
+
+#!!!! This avc can be allowed using the boolean 'allow_ypbind'
+allow sysadm_t node_t:tcp_socket node_bind;
+
+#============= syslogd_t ==============
+allow syslogd_t mysqld_etc_t:dir { open read search };
+allow syslogd_t mysqld_etc_t:file { getattr open read };
+allow syslogd_t var_run_t:file { getattr open read };
+
+#============= system_cronjob_t ==============
+allow system_cronjob_t cron_log_t:file { read write };
+
+#============= sshd_t ==============
+allow sshd_t var_run_t:file { open read getattr };
+allow sshd_t bin_t:file { open read execute };

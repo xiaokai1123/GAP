@@ -1,0 +1,80 @@
+<domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>  
+  <name>guest</name>
+  <memory unit='MiB'>1024</memory>
+  <currentMemory unit='MiB'>1024</currentMemory>
+  <cpu mode='host-passthrough'>
+   <feature policy='require' name='vmx'/>
+  </cpu>
+  <vcpu>2</vcpu>
+  <os>
+   <type arch='x86_64' machine='pc-i440fx-2.11'>hvm</type>
+   <boot dev='cdrom'/>
+   <boot dev='hd'/>
+   <bootmenu enable='yes'/>
+  </os>
+  <features>
+   <acpi/>
+   <apic/>
+   <pae/>
+  </features>
+  <clock offset='localtime'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+   <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='/media/disk1.img'/>
+      <target dev='hda' bus='ide'/>
+   </disk>
+   <disk type='file' device='disk'>
+      <driver name='qemu' type='raw'/>
+      <source file='/media/disk2.img'/>
+      <target dev='hdb' bus='ide'/>
+   </disk>
+   <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw' cache='none'/>
+      <source file='/media/guest.iso'/>
+      <target dev='hdc' bus='ide'/>
+      <readonly/>
+   </disk>
+   <controller type='usb' index='1' model='piix3-uhci'>
+      <alias name='usb'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x10' function='0x0'/>
+   </controller>
+   <controller type='usb' index='0' model='ehci'>
+      <alias name='usb'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x1' function='0x2'/>
+    </controller>
+   <memballoon model='virtio'>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x12' function='0x0'/>
+    </memballoon>
+    <graphics type='vnc' port='-1' autoport='yes' listen='0.0.0.0' keymap='en-us'/>
+    <input type='tablet' bus='usb'/>
+    <interface type='bridge'>
+      <source bridge='virbr0'/>                           
+      <mac address="10:12:34:55:78:9a"/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
+   </interface>
+   <serial type="dev">
+      <source path="/dev/ttyS3"/>
+      <target port="1"/>
+   </serial>
+   <serial type="dev">
+      <source path="/dev/ttyUSB0"/>
+      <target port="2"/>
+   </serial>
+  </devices>
+  <qemu:commandline>                                                       
+    <qemu:arg value='-nodefaults'/>
+    <!--qemu:arg value='-full-screen'/-->
+    <!--qemu:arg value='-device'/>                                                
+    <qemu:arg value='vfio-pci,host=00:02.0,addr=02.0'/>
+    <qemu:arg value='-vga'/>
+    <qemu:arg value='none'/-->
+    <!--qemu:arg value='-object'/>    
+    <qemu:arg value='input-linux,id=kbd,evdev=/dev/input/by-id/usb-SIGMACHIP_USB_Keyboard-event-if00,grab_all=on,repeat=on'/>
+    <qemu:arg value='-object'/>    
+    <qemu:arg value='input-linux,id=mouse,evdev=/dev/input/by-id/usb-PixArt_Tiger_USB_Optical_Mouse-event-if00'/-->
+  </qemu:commandline> 
+</domain>

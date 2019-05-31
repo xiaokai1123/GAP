@@ -1,0 +1,27 @@
+#Yocto
+#Support ARM,MIPS,X86,PPC,...
+#
+#
+#Ubuntu14 environment set up for Yocto
+sudo apt-get install \
+     gawk wget git-core diffstat unzip texinfo gcc-multilib build-essential \
+     chrpath socat libsdl1.2-dev xterm tree vim openssh-server \
+     nfs-kernel-server tftpd-hpa pure-ftpd system-config-samba \
+     gcc-multilib g++-multilib zlib1g:i386 libssl-dev \
+     tofrodos autoconf libtool lzop \
+     xterm autoconf gettext \
+     libsqlite3-dev sqlite3 python-pysqlite2 libbz2-dev \
+     vnc4server -y
+
+sudo ln -s /usr/bin/todos /usr/bin/unix2dos
+sudo ln -s /usr/bin/fromdos /usr/bin/dos2unix
+
+
+#Note:
+#1.When use ssh-keygen,don't set passwd for key.
+#
+#2.Prepare directory for fetch tarballs,sstate-cache quickly
+#
+#3.Usage: source setup.sh <project> <machine> [builddir]
+
+

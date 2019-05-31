@@ -1,0 +1,122 @@
+#!/bin/sh -e
+### BEGIN INIT INFO
+# Provides:          networking
+# Required-Start:    mountvirtfs $local_fs
+# Required-Stop:     $local_fs
+# Should-Start:      ifupdown
+# Should-Stop:       ifupdown
+# Default-Start:     S
+# Default-Stop:      0 6
+# Short-Description: Raise network interfaces.
+### END INIT INFO
+
+PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+
+[ -x /sbin/ifup ] || exit 0
+
+check_network_file_systems() {
+    [ -e /proc/mounts ] || return 0
+
+    if [ -e /etc/iscsi/iscsi.initramfs ]; then
+	echo "not deconfiguring network interfaces: iSCSI root is mounted."
+	exit 0
+    fi
+
+    exec 9<&0 < /proc/mounts
+    while read DEV MTPT FSTYPE REST; do
+	case $DEV in
+	/dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)
+	    echo "not deconfiguring network interfaces: network devices still mounted."
+	    exit 0
+	    ;;
+	esac
+	case $FSTYPE in
+	nfs|nfs4|smbfs|ncp|ncpfs|cifs|coda|ocfs2|gfs|pvfs|pvfs2|fuse.httpfs|fuse.curlftpfs)
+	    echo "not deconfiguring network interfaces: network file systems still mounted."
+	    exit 0
+	    ;;
+	esac
+    done
+    exec 0<&9 9<&-
+}
+
+check_network_swap() {
+    [ -e /proc/swaps ] || return 0
+
+    exec 9<&0 < /proc/swaps
+    while read DEV MTPT FSTYPE REST; do
+	case $DEV in
+	/dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)
+	    echo "not deconfiguring network interfaces: network swap still mounted."
+	    exit 0
+	    ;;
+	esac
+    done
+    exec 0<&9 9<&-
+}
+
+#For ppc board
+set_mac() {
+    if [ $# != 2 ]; then
+        echo "args error"
+        return
+    fi
+
+    if [ ! -f /tmp/_boot ]; then
+        dd if=/dev/mtdblock0 of=/tmp/boot bs=128k skip=3 count=1 > /dev/null 2>&1
+        ethaddr=`strings /tmp/boot | grep "addr"`
+    fi
+    c=$2    
+    mac=`echo $ethaddr | awk -v c="$c" -F "=" '{print $c}' | cut -c1-17`
+    ifconfig $1 down
+    ifconfig $1 hw ether $mac
+}
+
+case "$1" in
+start)
+	#for ppc board
+	if [ -f /dev/mtdblock0 ]; then
+		set_mac "agl0" "2"
+		set_mac "agl1" "3"
+		set_mac "eth0" "4"
+		set_mac "eth1" "5"
+		set_mac "eth2" "6"
+		set_mac "eth3" "7"
+		set_mac "eth4" "8"
+		set_mac "eth5" "9"
+	fi
+	if [ ! -f /tmp/_boot ]; then
+		rm -f /tmp/_boot
+	fi
+
+	echo -n "Configuring network interfaces... "
+	sysctl -e -p /etc/sysctl.conf >/dev/null 2>&1
+	ifup -a
+	echo "done."
+	;;
+
+stop)
+	check_network_file_systems
+	check_network_swap
+
+	echo -n "Deconfiguring network interfaces... "
+	ifdown -a
+	echo "done."
+	;;
+
+force-reload|restart)
+	echo "Running $0 $1 is deprecated because it may not enable again some interfaces"
+	echo "Reconfiguring network interfaces... "
+	ifdown -a || true
+	ifup -a
+	echo "done."
+	;;
+
+*)
+	echo "Usage: /etc/init.d/networking {start|stop}"
+	exit 1
+	;;
+esac
+
+exit 0
+

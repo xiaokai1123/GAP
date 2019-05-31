@@ -1,0 +1,90 @@
+--- Starting bitbake server pid 366 at 2019-05-24 16:05:34.685065 ---
+Started bitbake server pid 366
+DEBUG: Found bblayers.conf (/data/xiaokai/build_atom/build_gapx86/conf/bblayers.conf)
+DEBUG: Adding layer /data/xiaokai/build_atom/.open-layers/poky/meta
+DEBUG: Adding layer /data/xiaokai/build_atom/.open-layers/poky/meta-poky
+DEBUG: Adding layer /data/xiaokai/build_atom/.open-layers/poky/meta-yocto-bsp
+DEBUG: Adding layer /data/xiaokai/build_atom/meta-gap
+DEBUG: Adding layer /data/xiaokai/build_atom/.open-layers/meta-openembedded/meta-oe
+DEBUG: Adding layer /data/xiaokai/build_atom/.open-layers/meta-openembedded/meta-python
+DEBUG: Adding layer /data/xiaokai/build_atom/.open-layers/meta-openembedded/meta-networking
+DEBUG: Adding layer /data/xiaokai/build_atom/.open-layers/meta-openembedded/meta-webserver
+DEBUG: Adding layer /data/xiaokai/build_atom/.open-layers/meta-openembedded/../meta-selinux
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:746: including conf/abi_version.conf
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:747: including conf/site.conf
+DEBUG: CONF file 'conf/site.conf' not found
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:748: including conf/auto.conf
+DEBUG: CONF file 'conf/auto.conf' not found
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:749: including conf/local.conf
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:750: including conf/multiconfig/default.conf
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:751: including conf/machine/gapx86.conf
+DEBUG: CONF /data/xiaokai/build_atom/meta-gap/conf/machine/gapx86.conf:7: including conf/machine/include/tune-core2.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/machine/include/tune-core2.inc:12: including conf/machine/include/tune-i686.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/machine/include/tune-i686.inc:16: including conf/machine/include/tune-i586.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/machine/include/tune-i586.inc:3: including conf/machine/include/x86/arch-x86.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:752: including conf/machine-sdk/x86_64.conf
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:753: including conf/distro/Rongannetwork.conf
+DEBUG: CONF /data/xiaokai/build_atom/meta-gap/conf/distro/Rongannetwork.conf:99: including conf/distro/include/poky-world-exclude.inc
+Entering server connection loop
+DEBUG: CONF /data/xiaokai/build_atom/meta-gap/conf/distro/Rongannetwork.conf:100: including conf/distro/include/no-static-libs.inc
+DEBUG: CONF /data/xiaokai/build_atom/meta-gap/conf/distro/Rongannetwork.conf:101: including conf/distro/include/yocto-uninative.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:754: including conf/distro/defaultsetup.conf
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/distro/defaultsetup.conf:1: including conf/distro/include/default-providers.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/distro/defaultsetup.conf:2: including conf/distro/include/default-versions.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/distro/defaultsetup.conf:3: including conf/distro/include/default-distrovars.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/distro/defaultsetup.conf:4: including conf/distro/include/world-broken.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/distro/defaultsetup.conf:7: including conf/distro/include/tcmode-default.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/distro/include/tcmode-default.inc:73: including conf/distro/include/as-needed.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/distro/defaultsetup.conf:10: including conf/distro/include/tclibc-glibc.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/distro/defaultsetup.conf:12: including conf/distro/include/uninative-flags.inc
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:755: including conf/documentation.conf
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:756: including conf/licenses.conf
+DEBUG: CONF /data/xiaokai/build_atom/.open-layers/poky/meta/conf/bitbake.conf:757: including conf/sanity.conf
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/base.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/patch.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/base.bbclass:4)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/terminal.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/patch.bbclass:11)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/staging.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/base.bbclass:5)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/mirrors.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/base.bbclass:7)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/utils.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/base.bbclass:8)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/utility-tasks.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/base.bbclass:9)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/metadata_scm.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/base.bbclass:10)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/logging.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/base.bbclass:11)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/own-mirrors.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta-poky/classes/poky-sanity.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/uninative.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/package_rpm.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/package.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/package_rpm.bbclass:1)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/packagedata.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/package.bbclass:41)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/chrpath.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/package.bbclass:42)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/insane.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/package.bbclass:45)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/buildstats.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/image-mklibs.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/linuxloader.bbclass (from /data/xiaokai/build_atom/.open-layers/poky/meta/classes/image-mklibs.bbclass:5)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/image-prelink.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/debian.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/devshell.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/sstate.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/license.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/remove-libtool.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/blacklist.bbclass (from configuration INHERITs:0)
+DEBUG: Inheriting /data/xiaokai/build_atom/.open-layers/poky/meta/classes/sanity.bbclass (from configuration INHERITs:0)
+DEBUG: Clearing SRCREV cache due to cache policy of: clear
+DEBUG: Using cache in '/data/xiaokai/build_atom/build_gapx86/cache/local_file_checksum_cache.dat'
+DEBUG: Using cache in '/data/xiaokai/build_atom/build_gapx86/cache/bb_codeparser.dat'
+DEBUG: Enabling uninative
+Accepting [<socket.socket fd=8, family=AddressFamily.AF_UNIX, type=SocketKind.SOCK_STREAM, proto=0, laddr=bitbake.sock>]
+Connecting Client
+Running command ['setFeatures', [2]]
+Running command ['updateConfig', {'force': False, 'invalidate_stamp': None, 'postfile': [], 'extra_assume_provided': [], 'profile': False, 'debug_domains': [], 'verbose': False, 'dry_run': False, 'abort': True, 'server_timeout': None, 'prefile': [], 'dump_signatures': [], 'debug': 0}, {'LC_PAPER': 'zh_CN.UTF-8', 'LC_NUMERIC': 'zh_CN.UTF-8', 'LC_NAME': 'zh_CN.UTF-8', 'BBPATH': '/data/xiaokai/build_atom/build_gapx86', 'SHLVL': '1', 'HOME': '/data/xiaokai', 'LC_ADDRESS': 'zh_CN.UTF-8', 'TERM': 'xterm', 'REPO_URL': 'file:///opt/git-repo/.git-repo.git', 'LOGNAME': 'xiaokai', 'SSH_CONNECTION': '192.168.18.108 52002 192.168.1.23 22', 'QT_QPA_PLATFORMTHEME': 'appmenu-qt5', 'XDG_SESSION_ID': '75', 'USER': 'xiaokai', 'LC_ALL': 'en_US.UTF-8', 'PATH': '/data/xiaokai/build_atom/.open-layers/poky/scripts:/data/xiaokai/build_atom/.open-layers/poky/bitbake/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games', 'BB_ENV_EXTRAWHITE': 'ALL_PROXY BBPATH_EXTRA BB_NO_NETWORK BB_NUMBER_THREADS BB_SETSCENE_ENFORCE BB_SRCREV_POLICY DISTRO FTPS_PROXY FTP_PROXY GIT_PROXY_COMMAND HTTPS_PROXY HTTP_PROXY MACHINE NO_PROXY PARALLEL_MAKE SCREENDIR SDKMACHINE SOCKS5_PASSWD SOCKS5_USER SSH_AGENT_PID SSH_AUTH_SOCK STAMPS_DIR TCLIBC TCMODE all_proxy ftp_proxy ftps_proxy http_proxy https_proxy no_proxy ', 'COMP_WORDBREAKS': ' \t\n"\'><;|&(:', 'LC_TELEPHONE': 'zh_CN.UTF-8', 'LANG': 'en_US.UTF-8', 'LC_TIME': 'zh_CN.UTF-8', 'SSH_TTY': '/dev/pts/18', 'XDG_RUNTIME_DIR': '/run/user/1012', 'DISPLAY': 'localhost:10.0', '_': '/data/xiaokai/build_atom/.open-layers/poky/bitbake/bin/bitbake', 'BUILDDIR': '/data/xiaokai/build_atom/build_gapx86', 'SSH_CLIENT': '192.168.18.108 52002 22', 'LC_MEASUREMENT': 'zh_CN.UTF-8', 'LC_IDENTIFICATION': 'zh_CN.UTF-8', 'LC_MONETARY': 'zh_CN.UTF-8', 'SHELL': '/bin/bash', 'OLDPWD': '/data/xiaokai/build_atom', 'PWD': '/data/xiaokai/build_atom/meta-gap', 'MAIL': '/var/mail/xiaokai'}, ['/data/xiaokai/build_atom/.open-layers/poky/bitbake/bin/bitbake', 'www']]
+Running command ['getVariable', 'BBINCLUDELOGS']
+Running command ['getVariable', 'BBINCLUDELOGS_LINES']
+Running command ['getSetVariable', 'BB_CONSOLELOG']
+Running command ['getUIHandlerNum']
+Running command ['setEventMask', 1, 20, {}, ['bb.runqueue.runQueueExitWait', 'bb.event.LogExecTTY', 'logging.LogRecord', 'bb.build.TaskFailed', 'bb.build.TaskBase', 'bb.event.ParseStarted', 'bb.event.ParseProgress', 'bb.event.ParseCompleted', 'bb.event.CacheLoadStarted', 'bb.event.CacheLoadProgress', 'bb.event.CacheLoadCompleted', 'bb.command.CommandFailed', 'bb.command.CommandExit', 'bb.command.CommandCompleted', 'bb.cooker.CookerExit', 'bb.event.MultipleProviders', 'bb.event.NoProvider', 'bb.runqueue.sceneQueueTaskStarted', 'bb.runqueue.runQueueTaskStarted', 'bb.runqueue.runQueueTaskFailed', 'bb.runqueue.sceneQueueTaskFailed', 'bb.event.BuildBase', 'bb.build.TaskStarted', 'bb.build.TaskSucceeded', 'bb.build.TaskFailedSilent', 'bb.build.TaskProgress', 'bb.event.ProcessStarted', 'bb.event.ProcessProgress', 'bb.event.ProcessFinished']]
+Running command ['getVariable', 'BB_DEFAULT_TASK']
+Running command ['setConfig', 'cmd', 'build']
+Running command ['buildTargets', ['www'], 'build']
+Connecting Client
+Disconnecting Client
+No timeout, exiting.
+Exiting

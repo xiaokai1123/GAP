@@ -1,0 +1,27 @@
+[client]
+#password					= password
+port						= 3306
+socket						= /var/lib/mysql/mysql.sock
+
+[mysqld_safe]
+err-log						= /data/mysql/RaOS.err
+
+[mysqld]
+user 						= mysql
+port 						= 3306
+socket 						= /var/lib/mysql/mysql.sock
+pid-file 					= /data/mysql/RaOS.pid
+log-error 					= /data/mysql/RaOS.err
+basedir 					= /usr
+datadir 					= /data/mysql
+skip-external-locking
+#skip-networking
+ignore-builtin-innodb
+default-storage-engine				= myisam
+#bind-address					= localhost
+bind-address					= 192.168.0.3
+
+#
+# include all files from the config directory
+#
+!includedir /etc/my.cnf.d

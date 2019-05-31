@@ -1,0 +1,12 @@
+meta-gap
+===============
+GAP project.
+
+
+Dependencies
+------------
+This layer depends on:
+URI: git@192.168.1.18:Yocto/meta-base.git
+
+Maintenance
+-----------

@@ -1,0 +1,3 @@
+Common targets are:
+    virtual/bundle
+    virtual/install

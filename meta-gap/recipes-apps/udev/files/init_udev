@@ -1,0 +1,180 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          udev
+# Required-Start:    mountvirtfs
+# Required-Stop:     
+# Default-Start:     S
+# Default-Stop:
+# Short-Description: Start udevd, populate /dev and load drivers.
+### END INIT INFO
+
+mac_base=
+mac_base1=
+mac_base2=
+mac_base3=
+mac_base4=
+
+get_base_mac() {
+    if [ ! -f /tmp/_getmac ]; then
+        dev="eth1"
+        offset=0x04e0
+        mac_hex=`ethtool -e $dev offset $offset |grep $offset | awk '{for(i=2;i<=NF;++i)printf $i" "}'`
+        #echo $mac_hex
+        for num in ${mac_hex}
+        do
+            _temp_mac=${_temp_mac}`echo -e "\x${num}"`
+        done
+        #mac_base="e05a9fb00001"
+        mac_base=`echo $_temp_mac | cut -c4-15`
+        mac_base_dec=`printf "%d" 0x$mac_base`
+        mac_base1_dec=`expr $mac_base_dec + 1`
+        mac_base2_dec=`expr $mac_base_dec + 2`
+        mac_base3_dec=`expr $mac_base_dec + 3`
+        mac_base4_dec=`expr $mac_base_dec + 4`
+        mac_base1=`printf "%012x" $mac_base1_dec`
+        mac_base2=`printf "%012x" $mac_base2_dec`
+        mac_base3=`printf "%012x" $mac_base3_dec`
+        mac_base4=`printf "%012x" $mac_base4_dec`
+        echo "mac_base            : ${mac_base}"
+        echo "mac_base1           : ${mac_base1}"
+        echo "mac_base2           : ${mac_base2}"
+        echo "mac_base3           : ${mac_base3}"
+        echo "mac_base4           : ${mac_base4}"
+        #touch /tmp/_getmac
+    fi
+}
+
+rename_eth () {
+    depmod -a
+    modprobe smsc95xx
+    sleep 2
+    ip link set eth0 down
+    ip link set eth1 down
+    ip link set eth2 down
+    ip link set eth3 down
+    ip link set eth4 down
+    ip link set eth5 down
+
+    ip link set eth5 name agl0
+    ip link set eth4 name ha
+    ip link set eth2 name eth4
+    ip link set eth0 name eth2
+    ip link set ha name eth0
+    ip link set eth1 name tmp0
+    ip link set eth3 name eth1
+    ip link set tmp0 name eth3
+
+    brctl addbr virbr0
+    brctl addif virbr0 eth1
+	brctl addif virbr0 eth2
+	brctl addif virbr0 eth3
+	brctl addif virbr0 eth4
+
+    get_base_mac
+
+    ifconfig eth1 hw ether $mac_base
+    ifconfig eth2 hw ether $mac_base1
+    ifconfig eth3 hw ether $mac_base2
+    ifconfig eth4 hw ether $mac_base3
+
+    ifconfig eth0 up 
+    ifconfig eth1 up 
+    ifconfig eth2 up 
+    ifconfig eth3 up 
+    ifconfig eth4 up 
+	ifconfig agl0 up
+
+    ifconfig virbr0 up
+}
+
+echo "rename ethernet..."
+rename_eth
+
+echo "done."
+#echo 1 > /proc/sys/kernel/random/write_wakeup_threshold
+#echo 1 > /proc/sys/kernel/random/urandom_min_reseed_secs
+#echo 8 > /proc/sys/kernel/random/read_wakeup_threshold
+
+export TZ=/etc/localtime
+
+[ -d /sys/class ] || exit 1
+[ -r /proc/mounts ] || exit 1
+[ -x /sbin/udevd ] || exit 1
+
+[ -f /etc/udev/udev.conf ] && . /etc/udev/udev.conf
+[ -f /etc/default/rcS ] && . /etc/default/rcS
+
+kill_udevd () {
+    pid=`pidof -x udevd`
+    [ -n "$pid" ] && kill $pid
+}
+
+case "$1" in
+  start)
+    export ACTION=add
+    # propagate /dev from /sys
+    echo "Starting udev"
+
+    # Check for requireed devtmpfs before trying to start udev and
+    # mount a no-existant fs.
+    if ! grep -q devtmpfs /proc/filesystems
+    then
+        echo "Missing devtmpfs, which is required for udev to run";
+        echo "Halting..."
+        halt
+    fi
+    # mount the devtmpfs on /dev, if not already done
+    LANG=C awk '$2 == "/dev" && ($3 == "devtmpfs") { exit 1 }' /proc/mounts && {
+            mount -n -o mode=0755 -t devtmpfs none "/dev"
+    }
+    [ -e /dev/pts ] || mkdir -m 0755 /dev/pts
+    [ -e /dev/shm ] || mkdir -m 1777 /dev/shm
+    # the automount rule for udev needs /tmp directory available, as /tmp is a symlink
+    # to /var/tmp which in turn is a symlink to /var/volatile/tmp, we need to make sure
+    # /var/volatile/tmp directory to be available.
+    mkdir -m 1777 -p /var/volatile/tmp
+
+    # make_extra_nodes
+    kill_udevd > "/dev/null" 2>&1
+
+    # trigger the sorted events
+    [ -e /proc/sys/kernel/hotplug ] && echo -e '\000' >/proc/sys/kernel/hotplug
+    /sbin/udevd -d
+
+    udevadm control --env=STARTUP=1
+    if [ "$not_first_boot" != "" ];then
+            if [ "$PROBE_PLATFORM_BUS" != "yes" ]; then
+                PLATFORM_BUS_NOMATCH="--subsystem-nomatch=platform"
+            else
+                PLATFORM_BUS_NOMATCH=""
+            fi
+            udevadm trigger --action=add --subsystem-nomatch=tty --subsystem-nomatch=mem --subsystem-nomatch=vc --subsystem-nomatch=vtconsole --subsystem-nomatch=misc --subsystem-nomatch=dcon --subsystem-nomatch=pci_bus --subsystem-nomatch=graphics --subsystem-nomatch=backlight --subsystem-nomatch=video4linux $PLATFORM_BUS_NOMATCH
+            (udevadm settle --timeout=3; udevadm control --env=STARTUP=)&
+    else
+            udevadm trigger --action=add
+            udevadm settle
+    fi
+    ;;
+  stop)
+    echo "Stopping udevd"
+    start-stop-daemon --stop --name udevd --quiet
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  status)
+    pid=`pidof -x udevd`
+    if [ -n "$pid" ]; then
+	echo "udevd (pid $pid) is running ..."
+    else
+	echo "udevd is stopped"
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|status|restart}"
+    exit 1
+esac
+exit 0

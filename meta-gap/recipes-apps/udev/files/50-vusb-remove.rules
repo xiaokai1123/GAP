@@ -1,0 +1,9 @@
+#
+#ACTION!="remove", GOTO ="TEND"
+
+#SUBSYSTEMS=="usb", DRIVERS=="usb", ATTRS{speed}=="480", RUN="/etc/udev/usb-libvirt-hotplug.sh guest 0"
+#SUBSYSTEMS=="usb", DRIVERS=="usb", ATTRS{speed}!="480", RUN="/etc/udev/usb-libvirt-hotplug.sh guest 1"
+
+#ACTION=="remove", SUBSYSTEMS=="usb", DRIVERS=="usb", ATTRS{speed}=="480", RUN="/etc/udev/usb-libvirt-hotplug.sh guest 0"
+#ACTION=="remove", SUBSYSTEMS=="usb", DRIVERS=="usb", ATTRS{speed}!="480", RUN="/etc/udev/usb-libvirt-hotplug.sh guest 1"
+#LABEL="TEND"
